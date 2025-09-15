@@ -39,11 +39,11 @@
         </developer>
     </developers>
     <scm>
-        <connection>scm:git:https://github.com/Netcracker/qubership-nifi-registry.git</connection>
-        <developerConnection>scm:git:https://github.com/Netcracker/qubership-nifi-registry.git</developerConnection>
-        <url>https://github.com/Netcracker/qubership-nifi-registry/tree/main</url>
-      <tag>HEAD</tag>
-  </scm>
+        <connection>scm:git:https://github.com/dmitry618/qubership-nifi-registry.git</connection>
+        <developerConnection>scm:git:https://github.com/dmitry618/qubership-nifi-registry.git</developerConnection>
+        <url>https://github.com/dmitry618/qubership-nifi-registry/tree/main</url>
+        <tag>HEAD</tag>
+    </scm>
     <modules>
         <module>nifi-registry-util</module>
         <module>nifi-registry-migration-util</module>
@@ -115,7 +115,7 @@
                 <repository>
                     <id>github</id>
                     <name>GitHub Packages</name>
-                    <url>https://maven.pkg.github.com/Netcracker/qubership-nifi-registry</url>
+                    <url>https://maven.pkg.github.com/dmitry618/qubership-nifi-registry</url>
                 </repository>
             </distributionManagement>
         </profile>
@@ -149,7 +149,7 @@
         <!-- GitHub packages repository for both release and SNAPSHOT versions -->
         <repository>
             <id>github</id>
-            <url>https://maven.pkg.github.com/netcracker/*</url>
+            <url>https://maven.pkg.github.com/dmitry618/*</url>
             <releases>
                 <enabled>true</enabled>
             </releases>
