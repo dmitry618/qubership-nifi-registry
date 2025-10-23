@@ -25,9 +25,16 @@ import java.time.format.DateTimeFormatter;
 @ComponentScan(basePackages = "org.qubership.cloud.nifi.registry.config")
 public class NifiRegistryPropertiesLookup implements CommandLineRunner {
     private static final Logger LOG = LoggerFactory.getLogger(NifiRegistryPropertiesLookup.class);
-
-    @Autowired
     private PropertiesManager propertiesManager;
+
+    /**
+     * Default constructor for Spring.
+     * @param propsManager instance of PropertiesManager to use
+     */
+    @Autowired
+    public NifiRegistryPropertiesLookup(final PropertiesManager propsManager) {
+        this.propertiesManager = propsManager;
+    }
 
     @Value("${config.notify-completion.path}")
     private String path;
