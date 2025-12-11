@@ -97,7 +97,6 @@ jobs:
     outputs:
       release-version: ${{ steps.build-and-publish.outputs.release-version }}
     steps:
-      # This step is needed if there is a GitHub App used for authentication to bypass the protected branch rule
       - name: "Build and Publish"
         id: build-and-publish
         uses: netcracker/qubership-workflow-hub/actions/maven-release@396774180000abdb825cbf150b56cc59c6913db8 #v2.0.5
@@ -132,7 +131,8 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
-
+        with:
+          persist-credentials: false
       - name: "Check Dockerfile existence"
         id: check_dockerfile
         shell: bash
@@ -156,22 +156,27 @@ jobs:
     needs: [check-dockerfile, deploy]
     steps:
       - name: "Prepare Docker tags"
+        if: ${{ github.event.inputs.mark-as-latest != 'true' }}
+        id: meta
+        uses: netcracker/qubership-workflow-hub/actions/metadata-action@396774180000abdb825cbf150b56cc59c6913db8 #v2.0.5
+        with:
+          default-template: "{{major}}.{{minor}}.{{patch}},{{major}}.{{minor}},{{major}}"
+          ref: ${{ needs.deploy.outputs.release-version }}
+          default-tag: ${{ needs.deploy.outputs.release-version }}
+      - name: Set env
+        if: ${{ github.event.inputs.mark-as-latest != 'true' }}
         run: |
-          if [ "${LATEST}" == "true" ]; then
-            TAGS="v${{ needs.deploy.outputs.release-version }},latest"
-          else
-            TAGS="v${{ needs.deploy.outputs.release-version }}"
-          fi
-          echo "TAGS=${TAGS}" >> $GITHUB_ENV
+          echo "TAGS=$META_STEP_RESULT" >> $GITHUB_ENV
         env:
-          LATEST: "${{ inputs.mark-as-latest }}"
+          META_STEP_RESULT: ${{ steps.meta.outputs.result }}
+
       - name: "Docker Build"
         id: docker_build
         uses: netcracker/qubership-workflow-hub/actions/docker-action@396774180000abdb825cbf150b56cc59c6913db8 #v2.0.5
         with:
           ref: v${{ needs.deploy.outputs.release-version }}
           download-artifact: true
-          tags: "${{ env.TAGS }}"
+          tags: ${{ env.TAGS }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
