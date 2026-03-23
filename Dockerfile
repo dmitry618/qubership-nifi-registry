@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM ghcr.io/netcracker/qubership-java-base:21-alpine-2.0.2@sha256:028b335259ba14a32c91c11657ebff5f3c7172fd5edb26cb612fc7ec82f9c698 AS base
+ARG BASE_IMAGE_VERSION='21-alpine-2.2.4'
+ARG BASE_IMAGE_VERSION_SHA256='sha256:eb6f44dac3e2a05b8ca69a5472b8054a0d3668fd7cfb2a037dfa36a7dba8c567'
+FROM ghcr.io/netcracker/qubership-java-base:$BASE_IMAGE_VERSION@$BASE_IMAGE_VERSION_SHA256 AS base
 LABEL org.opencontainers.image.authors="qubership.org"
 
 USER root
@@ -26,19 +28,11 @@ ENV NIFI_TOOLKIT_HOME=${NIFI_REGISTRY_BASE_DIR}/nifi-toolkit-current
 ENV HOME=${NIFI_REGISTRY_HOME}
 
 RUN mkdir -p /opt/java/openjdk/lib/security \
-    && ln -s /app/volumes/certs/java/cacerts /opt/java/openjdk/lib/security/cacerts \
-    #add appuser (10001:0):
-    && adduser --disabled-password \
-        --gecos "" \
-        --home "${NIFI_REGISTRY_HOME}" \
-        --ingroup "root" \
-        --no-create-home \
-        --uid 10001 \
-        $USER_NAME
+    && ln -s /app/volumes/certs/java/cacerts /opt/java/openjdk/lib/security/cacerts
 
 USER 10001
 
-FROM apache/nifi-registry:2.6.0@sha256:ddf611ca4488c8d9aa310591b9ede0bd3d1e847cd65bcbb0928b9fe7529fb93b AS nifi-reg2
+FROM apache/nifi-registry:2.7.2@sha256:a44cce96f8e0f3230107da7782fc1041787cfbdf84c2252441b8b78a0db7a71d AS nifi-reg2
 
 RUN mkdir -p $NIFI_REGISTRY_HOME/persistent_data \
     && mkdir -p $NIFI_REGISTRY_HOME/persistent_data/flow_storage \
@@ -115,16 +109,6 @@ VOLUME ${NIFI_REGISTRY_HOME}/run
 VOLUME ${NIFI_REGISTRY_HOME}/work
 
 EXPOSE 18080 18443
-# Start NiFi Registry
-#
-# We need to use the exec form to avoid running our command in a subshell and omitting signals,
-# thus being unable to shut down gracefully:
-# https://docs.docker.com/engine/reference/builder/#entrypoint
-#
-# Also we need to use relative path, because the exec form does not invoke a command shell,
-# thus normal shell processing does not happen:
-# https://docs.docker.com/engine/reference/builder/#exec-form-entrypoint-example
-#
-# ENTRYPOINT overrides CMD defined in base image
-ENTRYPOINT ["../scripts/start.sh"]
+
+CMD ["bash", "../scripts/start.sh"]
 HEALTHCHECK NONE
